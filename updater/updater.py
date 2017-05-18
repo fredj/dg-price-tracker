@@ -38,7 +38,7 @@ def update_price(entry, price):
         r = session.put(CONTENTS_API_URL % entry.get('path'), data=json.dumps(commit))
         assert r.ok, r.text
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     # update all prices
     entries = session.get(CONTENTS_API_URL % 'prices?ref=gh-pages').json()
@@ -46,5 +46,5 @@ if __name__ == "__main__":
         name = entry.get('name')
         site, product, _ = name.split('.')
         title, price, image = get_info(site, product)
-        logging.info('got product info: "%s", %s CHF' % (title, price))
+        logging.info('got product info: "%s": %s CHF' % (title, price))
         update_price(entry, price)
