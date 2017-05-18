@@ -12,13 +12,14 @@ BASE_URLS = {
     'd': 'https://www.digitec.ch/en/s2/product/',
 }
 
-def get_info(site, product_id):
-    url = BASE_URLS.get(site) + str(product_id)
+def get_info(product_id):
+    site, product = product_id.split('.')
+    url = BASE_URLS.get(site) + str(product)
     r = requests.get(url, headers=HTTP_HEADERS)
     if r.ok:
         doc = BeautifulSoup(r.content, 'html.parser')
         title = doc.html.find('meta', property='og:title').attrs.get('content')
-        price = doc.html.find('meta', itemprop='price').attrs.get('content')
         image = doc.html.find('meta', property='og:image').attrs.get('content')
+        price = doc.html.find('meta', itemprop='price').attrs.get('content')
 
-        return title, float(price), image
+        return title, image, float(price)
