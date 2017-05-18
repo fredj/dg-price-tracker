@@ -1,11 +1,12 @@
 import base64
 import datetime
 import json
+import logging
 import os
 
 import requests
 
-from price import get_price
+from product import get_info
 
 
 CONTENTS_API_URL = 'https://api.github.com/repos/fredj/dg-price-tracker/contents/%s'
@@ -20,18 +21,22 @@ session.headers.update({
 
 def update_price(entry, price):
     today = datetime.datetime.now().strftime('%Y-%m-%d')
-    content = session.get(entry.get('download_url')).text
-    content += '%s,%s\n' % (today, price)
-
-    commit = {
-        'message': 'Update price',
-        'content': base64.b64encode(bytes(content, 'utf-8')).decode('ascii'),
-        'sha': entry.get('sha'),
-        'branch': 'gh-pages',
-    }
-
-    r = session.put(CONTENTS_API_URL % entry.get('path'), data=json.dumps(commit))
-    assert r.ok, r.text
+    prices = session.get(entry.get('download_url')).text.split('\n')
+    # remove empty entries
+    prices = list(filter(None, prices))
+    last = prices[-1]
+    if not last.startswith(today) and not last.endswith(str(price)):
+        # avoid duplicated entries
+        prices.append('%s,%s' % (today, price))
+        content = '\n'.join(prices)
+        commit = {
+            'message': 'Update price',
+            'content': base64.b64encode(bytes(content, 'utf-8')).decode('ascii'),
+            'sha': entry.get('sha'),
+            'branch': 'gh-pages',
+        }
+        r = session.put(CONTENTS_API_URL % entry.get('path'), data=json.dumps(commit))
+        assert r.ok, r.text
 
 if __name__ == "__main__":
     # update all prices
@@ -39,5 +44,5 @@ if __name__ == "__main__":
     for entry in entries:
         name = entry.get('name')
         site, product, _ = name.split('.')
-        price = get_price(site, product)
+        title, price, image = get_info(site, product)
         update_price(entry, price)
