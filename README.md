@@ -1,6 +1,5 @@
 # Price tracker for digitec.ch and galaxus.ch
 
-
 Build:
 
 ```bash
