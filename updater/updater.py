@@ -39,7 +39,9 @@ def update_price(product_id, price):
         logging.info('create price file for %s' % product_id)
         prices = ['date,price']
     else:
-        download_url = entry.json().get('download_url')
+        meta = entry.json()
+        download_url = meta.get('download_url')
+        sha = meta.get('sha')
         prices = session.get(download_url).text.split('\n')
         # remove empty entries
         prices = list(filter(None, prices))
