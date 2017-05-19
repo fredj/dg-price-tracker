@@ -67,8 +67,8 @@ if __name__ == '__main__':
         title, image, price = get_info(product_id)
         logging.info('got product info: %s "%s": %s CHF' % (product_id, title, price))
         update_price(product_id, price)
-        # update products.csv with title and image
+        # update products.csv with title, last price and image
         # 'title' may contains commas
-        content[i] = ','.join([product_id, '"%s"' % title, image])
+        content[i] = '%s,"%s",%s,%s' % (product_id, title, price, image)
 
     push_commit(entry.get('path'), '\n'.join(content), '[skip ci] Update products.csv', entry.get('sha'))
