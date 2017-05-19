@@ -1,12 +1,32 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+    <title>digitec.ch / galaxus.ch price tracker</title>
+    <link href="index.css" rel="stylesheet">
+
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <link rel="stylesheet" href="index.css">
+    <link rel="import" href="bower_components/polymer/lib/elements/dom-bind.html">
+    <link rel="import" href="bower_components/polymer/lib/elements/dom-repeat.html">
+
+    <link rel="import" href="src/app-product.html">
+
   </head>
   <body>
-    <div id="graph"></div>
-    <script src="graph.js"></script>
+    <dom-bind>
+      <template>
+        <template is="dom-repeat" items="{{products}}">
+          <app-product
+             product-id="{{item.id}}"
+             product-title="{{item.title}}"
+             price="{{item.lastprice}}"
+             image="{{item.image}}">
+          </app-product>
+        </template>
+      </template>
+    </dom-bind>
+    <script src="index.js"></script>
   </body>
 </html>

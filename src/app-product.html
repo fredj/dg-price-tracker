@@ -1,0 +1,108 @@
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+
+<dom-module id="app-product">
+  <template>
+    <style>
+      path.line {
+        stroke: rgba(70, 130, 180, 1.0);
+        stroke-width: 2;
+      }
+    </style>
+    <paper-card heading="" image="">
+      <div class="card-content">
+        <!-- [[productTitle]] -->
+        <div class="price">[[price]] CHF</div>
+        <div id="graph">
+        </div>
+      </div>
+      <div class="card-actions">
+        <a href="[[product_url(productId)]]" target="_blank" tabindex="-1">
+          <paper-icon-button src="img/[[site(productId)]].svg" alt="digitec"></paper-icon-button>
+        </a>
+      </div>
+    </paper-card>
+  </template>
+  <script>
+    class AppProduct extends Polymer.Element {
+      static get is() {
+        return 'app-product';
+      }
+      static get properties() {
+        return {
+          productId: String,
+          productTitle: String,
+          price: Number,
+          image: String
+        };
+      }
+      ready() {
+        super.ready();
+////////////////
+        const margin = {top: 20, right: 20, bottom: 30, left: 50};
+        const width = 350 - margin.left - margin.right;
+        const height = 200 - margin.top - margin.bottom;
+
+        const x = d3.scaleTime().range([0, width]);
+        const y = d3.scaleLinear().range([height, 0]);
+
+        const xaxis = d3.axisBottom(x).ticks(d3.timeDay);
+        const yaxis = d3.axisLeft(y);
+
+        const svg = d3.select(this.$.graph).append('svg')
+              .attr('width', width + margin.left + margin.right)
+              .attr('height', height + margin.top + margin.bottom)
+              .append('g')
+              .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        const line = d3.line()
+              .x(function(d) { return x(d.date); })
+              .y(function(d) { return y(d.price); });
+
+        const parseDate = d3.timeParse('%Y-%m-%d');
+
+
+        d3.csv(`prices/${this.productId}.csv`, (prices) => {
+          prices.forEach((price) => {
+            price.date = parseDate(price.date);
+            price.price = parseFloat(price.price);
+          });
+
+          x.domain([
+            d3.min(prices, price => price.date),
+            d3.max(prices, price => price.date)
+          ]);
+          y.domain([0, d3.max(prices, price => price.price)]);
+
+          // x axis
+          svg.append('g')
+            .attr('transform', 'translate(0,' + height + ')')
+            .call(xaxis);
+
+          // y axis
+          svg.append('g')
+            .call(yaxis);
+
+          // line
+          svg.append('path')
+            .attr('class', 'line')
+            .attr('d', line(prices));
+        });
+////////////////
+      }
+      site(productId) {
+        return productId[0] === 'd' ? 'digitec' : 'galaxus';
+      }
+      product_url(productId) {
+        const id = productId.substr(2);
+        return `https://www.${this.site(productId)}.ch/en/s2/product/${id}`
+      }
+    }
+    customElements.define(AppProduct.is, AppProduct);
+  </script>
+</dom-module>
