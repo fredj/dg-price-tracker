@@ -12,6 +12,7 @@
       path.line {
         stroke: rgba(70, 130, 180, 1.0);
         stroke-width: 2;
+        fill: none;
       }
     </style>
     <paper-card heading="" image="">
@@ -61,6 +62,7 @@
               .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         const line = d3.line()
+              .curve(d3.curveStepAfter)
               .x(function(d) { return x(d.date); })
               .y(function(d) { return y(d.price); });
 
@@ -77,7 +79,8 @@
             d3.min(prices, price => price.date),
             d3.max(prices, price => price.date)
           ]);
-          y.domain([0, d3.max(prices, price => price.price)]);
+          y.domain([0, d3.max(prices, price => price.price)])
+            .nice();
 
           // x axis
           svg.append('g')
