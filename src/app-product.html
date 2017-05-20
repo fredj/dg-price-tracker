@@ -9,21 +9,45 @@
 <dom-module id="app-product">
   <template>
     <style>
+      :host {
+        display: inline-block;
+      }
+      paper-card {
+        width: 100%;
+      }
+      .card-actions {
+        display: flex;
+      }
+      .product-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 50px;
+      }
+      .product-image img {
+        max-height: 100%;
+      }
+      .right {
+        margin-left: auto;
+      }
       path.line {
         stroke: rgba(70, 130, 180, 1.0);
         stroke-width: 2;
         fill: none;
       }
     </style>
-    <paper-card heading="" image="">
+    <paper-card heading="[[productTitle]]">
+      <div class="product-image">
+        <img src="[[image]]">
+      </div>
+
       <div class="card-content">
         <!-- [[productTitle]] -->
-        <div class="price">[[price]] CHF</div>
-        <div id="graph">
-        </div>
+        <!-- <div class="price">[[price]] CHF</div> -->
+        <!-- <div id="graph"></div> -->
       </div>
       <div class="card-actions">
-        <a href="[[product_url(productId)]]" target="_blank" tabindex="-1">
+        <a class="right" href="[[product_url(productId)]]" target="_blank" tabindex="-1">
           <paper-icon-button src="img/[[site(productId)]].svg" alt="digitec"></paper-icon-button>
         </a>
       </div>
