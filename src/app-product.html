@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
 
@@ -15,8 +16,11 @@
       paper-card {
         width: 100%;
       }
-      .card-actions {
+      .product-header, .card-actions {
         display: flex;
+      }
+      .right {
+        margin-left: auto;
       }
       .product-image {
         display: flex;
@@ -24,11 +28,15 @@
         justify-content: center;
         height: 50px;
       }
+      .title {
+        font-weight: bold;
+      }
       .product-image img {
         max-height: 100%;
       }
-      .right {
-        margin-left: auto;
+
+      .tick {
+        font-family: monospace;
       }
       path.line {
         stroke: rgba(70, 130, 180, 1.0);
@@ -36,17 +44,23 @@
         fill: none;
       }
     </style>
-    <paper-card heading="[[productTitle]]">
-      <div class="product-image">
-        <img src="[[image]]">
-      </div>
+    <paper-card>
+      <!-- <div class="product-image"> -->
+      <!--   <img src="[[image]]"> -->
+      <!-- </div> -->
 
       <div class="card-content">
-        <!-- [[productTitle]] -->
-        <!-- <div class="price">[[price]] CHF</div> -->
-        <!-- <div id="graph"></div> -->
+        <div class="product-header">
+          <div class="title">[[productTitle]]</div>
+          <div class="price right">[[price]] CHF</div>
+        </div>
+        <iron-collapse id="collapse_panel">
+          <div id="graph"></div>
+        </iron-collapse>
       </div>
       <div class="card-actions">
+        <paper-icon-button id="collapse_icon" icon="expand-more" on-tap="toggle_graph"></paper-icon-button>
+
         <a class="right" href="[[product_url(productId)]]" target="_blank" tabindex="-1">
           <paper-icon-button src="img/[[site(productId)]].svg" alt="digitec"></paper-icon-button>
         </a>
@@ -65,6 +79,10 @@
           price: Number,
           image: String
         };
+      }
+      toggle_graph() {
+        this.$.collapse_panel.toggle();
+        this.$.collapse_icon.icon = this.$.collapse_panel.opened ? 'expand-less' : 'expand-more';
       }
       ready() {
         super.ready();
