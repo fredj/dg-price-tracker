@@ -46,8 +46,8 @@ def update_price(product_id, price):
         # remove empty entries
         prices = list(filter(None, prices))
     last = prices[-1]
-    # avoid duplicated entries
-    if not last.startswith(today) and not last.endswith(str(price)):
+    # avoid duplicated entries for the same day
+    if not (last.startswith(today) and last.endswith(str(price))):
         prices.append('%s,%s' % (today, price))
         push_commit(path, '\n'.join(prices), '[skip ci] Update product price', sha)
     else:
