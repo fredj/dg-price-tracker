@@ -2,10 +2,10 @@
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-
 
 <dom-module id="app-product">
   <template>
@@ -16,11 +16,10 @@
       paper-card {
         width: 100%;
       }
-      .product-header, .card-actions {
+      .product-header {
         display: flex;
-      }
-      .right {
-        margin-left: auto;
+        align-items: center;
+        padding: 8px;
       }
       .product-image {
         display: flex;
@@ -29,7 +28,15 @@
         height: 50px;
       }
       .title {
+        flex: 1;
         font-weight: bold;
+      }
+      iron-icon.trending {
+        --iron-icon-height: 18px;
+        --iron-icon-width: 18px;
+      }
+      .price {
+        padding: 0 8px;
       }
       .product-image img {
         max-height: 100%;
@@ -43,28 +50,28 @@
         stroke-width: 2;
         fill: none;
       }
+      path.area {
+        fill: rgba(70, 130, 180, 0.5);
+        stroke: none;
+      }
     </style>
     <paper-card>
+      <div class="product-header">
+        <a href="[[product_url(productId)]]" target="_blank" tabindex="-1">
+          <paper-icon-button src="img/[[site(productId)]].svg"></paper-icon-button>
+        </a>
+        <paper-icon-button id="collapse_icon" icon="expand-more" on-tap="toggle_graph"></paper-icon-button>
+        <div class="title">[[productTitle]]</div>
+        <div class="price">[[price]] CHF</div>
+        <iron-icon class="trending" icon="[[trending_icon(prices, 7)]]"></iron-icon>
+      </div>
+      <iron-collapse id="collapse_panel">
+        <div id="graph"></div>
+      </iron-collapse>
+
       <!-- <div class="product-image"> -->
       <!--   <img src="[[image]]"> -->
       <!-- </div> -->
-
-      <div class="card-content">
-        <div class="product-header">
-          <div class="title">[[productTitle]]</div>
-          <div class="price right">[[price]] CHF</div>
-        </div>
-        <iron-collapse id="collapse_panel">
-          <div id="graph"></div>
-        </iron-collapse>
-      </div>
-      <div class="card-actions">
-        <paper-icon-button id="collapse_icon" icon="expand-more" on-tap="toggle_graph"></paper-icon-button>
-
-        <a class="right" href="[[product_url(productId)]]" target="_blank" tabindex="-1">
-          <paper-icon-button src="img/[[site(productId)]].svg" alt="digitec"></paper-icon-button>
-        </a>
-      </div>
     </paper-card>
   </template>
   <script>
@@ -77,8 +84,14 @@
           productId: String,
           productTitle: String,
           price: Number,
-          image: String
+          image: String,
+          prices: Array
         };
+      }
+      static get observers() {
+        return [
+          'get_prices(productId)'
+        ];
       }
       toggle_graph() {
         this.$.collapse_panel.toggle();
@@ -105,11 +118,16 @@
 
         const line = d3.line()
               .curve(d3.curveStepAfter)
-              .x(function(d) { return x(d.date); })
-              .y(function(d) { return y(d.price); });
+              .x((d) => x(d.date))
+              .y((d) => y(d.price));
+
+        const area = d3.area()
+              .curve(d3.curveStepAfter)
+              .x((d) => x(d.date))
+              .y0(height)
+              .y1((d) => y(d.price));
 
         const parseDate = d3.timeParse('%Y-%m-%d');
-
 
         d3.csv(`prices/${this.productId}.csv`, (prices) => {
           prices.forEach((price) => {
@@ -133,6 +151,11 @@
           svg.append('g')
             .call(yaxis);
 
+          // area
+          svg.append('path')
+            .attr('class', 'area')
+            .attr('d', area(prices));
+
           // line
           svg.append('path')
             .attr('class', 'line')
@@ -140,8 +163,35 @@
         });
 ////////////////
       }
+      get_prices(productId) {
+        const parseDate = d3.timeParse('%Y-%m-%d');
+        d3.csv(`prices/${this.productId}.csv`, (prices) => {
+          prices.forEach((price) => {
+            price.date = parseDate(price.date);
+            price.price = parseFloat(price.price);
+          });
+          this.prices = prices;
+        });
+      }
       site(productId) {
         return productId[0] === 'd' ? 'digitec' : 'galaxus';
+      }
+      trending_icon(prices, days) {
+        const diff = this.trending(prices, days);
+        if (diff === 0) {
+          return 'trending-flat';
+        } else {
+          return diff < 0 ? 'trending-up' : 'trending-down';
+        }
+      }
+      trending(prices, days) {
+        let diff = 0;
+        prices.slice(-days).map((price) => price.price).forEach((price, index, arr) => {
+          if (index < arr.length - 1) {
+            diff += price - arr[index + 1];
+          }
+        });
+        return diff;
       }
       product_url(productId) {
         const id = productId.substr(2);
