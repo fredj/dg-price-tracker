@@ -42,12 +42,19 @@
         max-height: 100%;
       }
 
-      .tick {
+
+      .axis {
         font-family: monospace;
+      }
+      .axis .domain, .axis .tick line {
+        stroke: #f3f5f7;
+      }
+      .axis .tick text {
+        fill: #9da0ae;
       }
       path.line {
         stroke: rgba(70, 130, 180, 1.0);
-        stroke-width: 2;
+        stroke-width: 1;
         fill: none;
       }
       path.area {
@@ -144,11 +151,13 @@
 
           // x axis
           svg.append('g')
+            .attr('class', 'axis')
             .attr('transform', 'translate(0,' + height + ')')
             .call(xaxis);
 
           // y axis
           svg.append('g')
+            .attr('class', 'axis')
             .call(yaxis);
 
           // area
