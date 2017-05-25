@@ -7,6 +7,8 @@
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
+<link rel="import" href="app-graph.html">
+
 <dom-module id="app-product">
   <template>
     <style>
@@ -41,26 +43,6 @@
       .product-image img {
         max-height: 100%;
       }
-
-
-      .axis {
-        font-family: monospace;
-      }
-      .axis .domain, .axis .tick line {
-        stroke: #f3f5f7;
-      }
-      .axis .tick text {
-        fill: #9da0ae;
-      }
-      path.line {
-        stroke: rgba(70, 130, 180, 1.0);
-        stroke-width: 1;
-        fill: none;
-      }
-      path.area {
-        fill: rgba(70, 130, 180, 0.5);
-        stroke: none;
-      }
     </style>
     <paper-card>
       <div class="product-header">
@@ -73,7 +55,7 @@
         <iron-icon class="trending" icon="[[trending_icon(prices, 7)]]"></iron-icon>
       </div>
       <iron-collapse id="collapse_panel">
-        <div id="graph"></div>
+        <app-graph values="[[prices]]"></app-graph>
       </iron-collapse>
 
       <!-- <div class="product-image"> -->
@@ -103,74 +85,6 @@
       toggle_graph() {
         this.$.collapse_panel.toggle();
         this.$.collapse_icon.icon = this.$.collapse_panel.opened ? 'expand-less' : 'expand-more';
-      }
-      ready() {
-        super.ready();
-////////////////
-        const margin = {top: 20, right: 20, bottom: 30, left: 50};
-        const width = 350 - margin.left - margin.right;
-        const height = 200 - margin.top - margin.bottom;
-
-        const x = d3.scaleTime().range([0, width]);
-        const y = d3.scaleLinear().range([height, 0]);
-
-        const xaxis = d3.axisBottom(x).ticks(d3.timeDay);
-        const yaxis = d3.axisLeft(y);
-
-        const svg = d3.select(this.$.graph).append('svg')
-              .attr('width', width + margin.left + margin.right)
-              .attr('height', height + margin.top + margin.bottom)
-              .append('g')
-              .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-        const line = d3.line()
-              .curve(d3.curveStepAfter)
-              .x((d) => x(d.date))
-              .y((d) => y(d.price));
-
-        const area = d3.area()
-              .curve(d3.curveStepAfter)
-              .x((d) => x(d.date))
-              .y0(height)
-              .y1((d) => y(d.price));
-
-        const parseDate = d3.timeParse('%Y-%m-%d');
-
-        d3.csv(`prices/${this.productId}.csv`, (prices) => {
-          prices.forEach((price) => {
-            price.date = parseDate(price.date);
-            price.price = parseFloat(price.price);
-          });
-
-          x.domain([
-            d3.min(prices, price => price.date),
-            d3.max(prices, price => price.date)
-          ]);
-          y.domain([0, d3.max(prices, price => price.price)])
-            .nice();
-
-          // x axis
-          svg.append('g')
-            .attr('class', 'axis')
-            .attr('transform', 'translate(0,' + height + ')')
-            .call(xaxis);
-
-          // y axis
-          svg.append('g')
-            .attr('class', 'axis')
-            .call(yaxis);
-
-          // area
-          svg.append('path')
-            .attr('class', 'area')
-            .attr('d', area(prices));
-
-          // line
-          svg.append('path')
-            .attr('class', 'line')
-            .attr('d', line(prices));
-        });
-////////////////
       }
       get_prices(productId) {
         const parseDate = d3.timeParse('%Y-%m-%d');

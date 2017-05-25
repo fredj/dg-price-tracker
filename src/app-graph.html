@@ -1,0 +1,104 @@
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="app-graph">
+  <template>
+    <style>
+      .axis {
+        font-family: monospace;
+      }
+      .axis .domain, .axis .tick line {
+        stroke: #f3f5f7;
+      }
+      .axis .tick text {
+        fill: #9da0ae;
+      }
+      path.line {
+        stroke: rgba(70, 130, 180, 1.0);
+        stroke-width: 1;
+        fill: none;
+      }
+      path.area {
+        fill: rgba(70, 130, 180, 0.5);
+        stroke: none;
+      }
+    </style>
+    <div id="graph"></div>
+  </template>
+  <script>
+    class AppGraph extends Polymer.Element {
+      static get is() {
+        return 'app-graph';
+      }
+      static get properties() {
+        return {
+          values: {
+            type: Array,
+            observer: 'valuesChanged'
+          }
+        };
+      }
+      valuesChanged() {
+        const margin = {top: 20, right: 20, bottom: 30, left: 50};
+        const width = 350 - margin.left - margin.right;
+        const height = 200 - margin.top - margin.bottom;
+
+        const x = d3.scaleTime().range([0, width]);
+        const y = d3.scaleLinear().range([height, 0]);
+
+        const xaxis = d3.axisBottom(x).ticks(d3.timeDay);
+        const yaxis = d3.axisLeft(y);
+
+        const svg = d3.select(this.$.graph).append('svg')
+              .attr('width', width + margin.left + margin.right)
+              .attr('height', height + margin.top + margin.bottom)
+              .append('g')
+              .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        const line = d3.line()
+              .curve(d3.curveStepAfter)
+              .x((d) => x(d.date))
+              .y((d) => y(d.price));
+
+        const area = d3.area()
+              .curve(d3.curveStepAfter)
+              .x((d) => x(d.date))
+              .y0(height)
+              .y1((d) => y(d.price));
+
+        const parseDate = d3.timeParse('%Y-%m-%d');
+
+        x.domain([
+          d3.min(this.values, price => price.date),
+          d3.max(this.values, price => price.date)
+        ]);
+        y.domain([0, d3.max(this.values, price => price.price)])
+          .nice();
+
+        // x axis
+        svg.append('g')
+          .attr('class', 'axis')
+          .attr('transform', 'translate(0,' + height + ')')
+          .call(xaxis);
+
+        // y axis
+        svg.append('g')
+          .attr('class', 'axis')
+          .call(yaxis);
+
+        // area
+        svg.append('path')
+          .attr('class', 'area')
+          .attr('d', area(this.values));
+
+        // line
+        svg.append('path')
+          .attr('class', 'line')
+          .attr('d', line(this.values));
+
+      }
+    };
+    customElements.define(AppGraph.is, AppGraph);
+  </script>
+</dom-module>
