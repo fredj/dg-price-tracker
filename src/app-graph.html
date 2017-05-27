@@ -9,10 +9,10 @@
         font-family: monospace;
       }
       .axis .domain, .axis .tick line {
-        stroke: #f3f5f7;
+        stroke: var(--google-grey-700);
       }
       .axis .tick text {
-        fill: #9da0ae;
+        fill: var(--google-grey-700);
       }
       path.line {
         stroke: rgba(70, 130, 180, 1.0);
@@ -20,8 +20,11 @@
         fill: none;
       }
       path.area {
-        fill: rgba(70, 130, 180, 0.5);
+        fill: rgba(70, 130, 180, 0.3);
         stroke: none;
+      }
+      path, line {
+        shape-rendering: crispEdges;
       }
     </style>
     <div id="graph"></div>
@@ -33,6 +36,8 @@
       }
       static get properties() {
         return {
+          width: Number,
+          height: Number,
           values: {
             type: Array,
             observer: 'valuesChanged'
@@ -41,8 +46,8 @@
       }
       valuesChanged() {
         const margin = {top: 20, right: 20, bottom: 30, left: 50};
-        const width = 350 - margin.left - margin.right;
-        const height = 200 - margin.top - margin.bottom;
+        const width = this.width - margin.left - margin.right;
+        const height = this.height - margin.top - margin.bottom;
 
         const x = d3.scaleTime().range([0, width]);
         const y = d3.scaleLinear().range([height, 0]);
@@ -54,7 +59,7 @@
               .attr('width', width + margin.left + margin.right)
               .attr('height', height + margin.top + margin.bottom)
               .append('g')
-              .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+              .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
         const line = d3.line()
               .curve(d3.curveStepAfter)

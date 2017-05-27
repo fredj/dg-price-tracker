@@ -15,18 +15,20 @@
 
   </head>
   <body>
-    <dom-bind>
-      <template>
-        <template is="dom-repeat" items="{{products}}">
-          <app-product
-             product-id="{{item.id}}"
-             product-title="{{item.title}}"
-             price="{{item.lastprice}}"
-             image="{{item.image}}">
-          </app-product>
+    <div class="container">
+      <dom-bind>
+        <template>
+          <template is="dom-repeat" items="{{products}}">
+            <app-product
+               product-id="{{item.id}}"
+               product-title="{{item.title}}"
+               price="{{item.lastprice}}"
+               image="{{item.image}}">
+            </app-product>
+          </template>
         </template>
-      </template>
-    </dom-bind>
+      </dom-bind>
+    </div>
     <script src="index.js"></script>
   </body>
 </html>
