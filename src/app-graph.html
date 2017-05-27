@@ -16,7 +16,7 @@
       }
       path.line {
         stroke: rgba(70, 130, 180, 1.0);
-        stroke-width: 1;
+        stroke-width: 2;
         fill: none;
       }
       path.area {
@@ -38,70 +38,99 @@
         return {
           width: Number,
           height: Number,
+          transitionDuration: {
+            type: Number,
+            value: 200
+          },
+          period: {
+            type: Number,
+            observer: 'plot'
+          },
           values: {
             type: Array,
-            observer: 'valuesChanged'
+            observer: 'plot'
           }
         };
       }
-      valuesChanged() {
+      ready() {
+        super.ready();
+
         const margin = {top: 20, right: 20, bottom: 30, left: 50};
         const width = this.width - margin.left - margin.right;
         const height = this.height - margin.top - margin.bottom;
 
-        const x = d3.scaleTime().range([0, width]);
-        const y = d3.scaleLinear().range([height, 0]);
+        this.x = d3.scaleTime().range([0, width]);
+        this.y = d3.scaleLinear().range([height, 0]);
 
-        const xaxis = d3.axisBottom(x).ticks(d3.timeDay);
-        const yaxis = d3.axisLeft(y);
+        this.xaxis = d3.axisBottom(this.x).ticks(d3.timeDay);
+        this.yaxis = d3.axisLeft(this.y);
 
-        const svg = d3.select(this.$.graph).append('svg')
-              .attr('width', width + margin.left + margin.right)
-              .attr('height', height + margin.top + margin.bottom)
-              .append('g')
-              .attr('transform', `translate(${margin.left}, ${margin.top})`);
+        this.svg = d3.select(this.$.graph).append('svg')
+          .attr('width', width + margin.left + margin.right)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-        const line = d3.line()
-              .curve(d3.curveStepAfter)
-              .x((d) => x(d.date))
-              .y((d) => y(d.price));
+        this.line = d3.line()
+          .curve(d3.curveStepAfter)
+          .x((d) => this.x(d.date))
+          .y((d) => this.y(d.price));
 
-        const area = d3.area()
-              .curve(d3.curveStepAfter)
-              .x((d) => x(d.date))
-              .y0(height)
-              .y1((d) => y(d.price));
-
-        const parseDate = d3.timeParse('%Y-%m-%d');
-
-        x.domain([
-          d3.min(this.values, price => price.date),
-          d3.max(this.values, price => price.date)
-        ]);
-        y.domain([0, d3.max(this.values, price => price.price)])
-          .nice();
+        this.area = d3.area()
+          .curve(d3.curveStepAfter)
+          .x((d) => this.x(d.date))
+          .y0(height)
+          .y1((d) => this.y(d.price));
 
         // x axis
-        svg.append('g')
-          .attr('class', 'axis')
-          .attr('transform', 'translate(0,' + height + ')')
-          .call(xaxis);
+        this.svg.append('g')
+          .attr('class', 'axis x-axis')
+          .attr('transform', `translate(0, ${height})`);
 
         // y axis
-        svg.append('g')
-          .attr('class', 'axis')
-          .call(yaxis);
+        this.svg.append('g')
+          .attr('class', 'axis y-axis')
 
         // area
-        svg.append('path')
-          .attr('class', 'area')
-          .attr('d', area(this.values));
+        this.svg.append('path')
+          .attr('class', 'area');
 
         // line
-        svg.append('path')
-          .attr('class', 'line')
-          .attr('d', line(this.values));
+        this.svg.append('path')
+          .attr('class', 'line');
 
+      }
+      plot() {
+        const period = this.period === undefined ? this.values.length : this.period;
+        const values = this.values.slice(-this.period);
+        this.x.domain([
+          d3.min(values, price => price.date),
+          d3.max(values, price => price.date)
+        ]);
+        this.y.domain([0, d3.max(values, price => price.price)])
+          .nice();
+
+        var svg = this.svg.transition();
+
+        // x axis
+        svg.select('.x-axis')
+          .duration(this.transitionDuration)
+          .call(this.xaxis);
+
+        // y axis
+        svg.select('.y-axis')
+          .duration(this.transitionDuration)
+          .call(this.yaxis);
+
+        // // area
+        // svg.select('.area')
+        //   .duration(this.transitionDuration)
+        //   .attr('d', this.area(values));
+
+        // line
+        svg.select('.line')
+          .duration(this.transitionDuration)
+          .attr('d', this.line(values));
       }
     };
     customElements.define(AppGraph.is, AppGraph);
