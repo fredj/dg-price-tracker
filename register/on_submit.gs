@@ -2,7 +2,6 @@ var authHeader = {
   'Authorization': 'token CHANGE_ME'
 };
 var productsUrl = 'https://api.github.com/repos/fredj/dg-price-tracker/contents/products.csv?ref=gh-pages'
-var issueUrl = 'https://api.github.com/repos/fredj/dg-price-tracker/issues'
 
 function onFormSubmit(event) {
   // get products.csv
