@@ -8,6 +8,7 @@
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <link rel="import" href="app-graph.html">
 
@@ -43,6 +44,12 @@
       .price, .title {
         padding: 0 8px;
       }
+      .graph {
+        padding: 8px;
+      }
+      .period-selector paper-button {
+        font-size: 10px;
+      }
       .actions {
         border-top: 1px solid #e8e8e8;
       }
@@ -57,7 +64,14 @@
         <paper-tooltip for="trending" position="left">[[trending_as_money(prices)]] last week</paper-tooltip>
       </div>
       <iron-collapse id="collapse_panel">
-        <app-graph values="[[prices]]" width="600" height="260"></app-graph>
+        <div class="graph">
+          <app-graph values="[[prices]]" width="600" height="260" period="[[graphPeriod]]"></app-graph>
+          <div class="period-selector">
+            <paper-button toggles data-value="7" on-tap="update_graph_period">last week</paper-button>
+            <paper-button toggles data-value="30" on-tap="update_graph_period">last month</paper-button>
+            <paper-button toggles on-tap="update_graph_period">all</paper-button>
+          </div>
+        </div>
         <div class="actions">
           <a href="[[product_url(productId)]]" target="_blank" tabindex="-1">
             <paper-icon-button src="img/[[site(productId)]].svg"></paper-icon-button>
@@ -77,13 +91,17 @@
           productTitle: String,
           price: Number,
           image: String,
-          prices: Array
+          prices: Array,
+          graphPeriod: Number
         };
       }
       static get observers() {
         return [
           'get_prices(productId)'
         ];
+      }
+      update_graph_period(event) {
+        this.graphPeriod = event.target.dataset.value;
       }
       toggle_graph() {
         this.$.collapse_panel.toggle();
