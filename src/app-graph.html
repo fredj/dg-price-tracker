@@ -5,6 +5,9 @@
 <dom-module id="app-graph">
   <template>
     <style>
+      :host {
+        display: block;
+      }
       .axis {
         font-family: monospace;
       }
@@ -27,7 +30,14 @@
         shape-rendering: crispEdges;
       }
     </style>
-    <div id="graph"></div>
+    <svg id="graph">
+      <g class="container" transform="">
+        <g class="axis x-axis" transform="" ></g>
+        <g class="axis y-axis"></g>
+        <path class="area"></path>
+        <path class="line"></path>
+      </g>
+    </svg>
   </template>
   <script>
     class AppGraph extends Polymer.Element {
@@ -36,71 +46,25 @@
       }
       static get properties() {
         return {
-          width: Number,
-          height: Number,
-          transitionDuration: {
-            type: Number,
-            value: 200
-          },
+          values: Array,
           period: {
             type: Number,
-            observer: 'plot'
-          },
-          values: {
-            type: Array,
             observer: 'plot'
           }
         };
       }
-      ready() {
-        super.ready();
-
-        const margin = {top: 20, right: 20, bottom: 30, left: 50};
-        const width = this.width - margin.left - margin.right;
-        const height = this.height - margin.top - margin.bottom;
-
-        this.x = d3.scaleTime().range([0, width]);
-        this.y = d3.scaleLinear().range([height, 0]);
-
-        this.xaxis = d3.axisBottom(this.x).ticks(d3.timeDay);
-        this.yaxis = d3.axisLeft(this.y);
-
-        this.svg = d3.select(this.$.graph).append('svg')
-          .attr('width', width + margin.left + margin.right)
-          .attr('height', height + margin.top + margin.bottom)
-          .append('g')
-          .attr('transform', `translate(${margin.left}, ${margin.top})`);
+      constructor() {
+        super();
 
         this.line = d3.line()
           .curve(d3.curveStepAfter)
           .x((d) => this.x(d.date))
           .y((d) => this.y(d.price));
-
-        this.area = d3.area()
-          .curve(d3.curveStepAfter)
-          .x((d) => this.x(d.date))
-          .y0(height)
-          .y1((d) => this.y(d.price));
-
-        // x axis
-        this.svg.append('g')
-          .attr('class', 'axis x-axis')
-          .attr('transform', `translate(0, ${height})`);
-
-        // y axis
-        this.svg.append('g')
-          .attr('class', 'axis y-axis')
-
-        // area
-        this.svg.append('path')
-          .attr('class', 'area');
-
-        // line
-        this.svg.append('path')
-          .attr('class', 'line');
-
       }
+      // values or period changed
       plot() {
+
+        /////////////////////////////////
         const period = this.period === undefined ? this.values.length : this.period;
         const values = this.values.slice(-this.period);
         this.x.domain([
@@ -110,27 +74,43 @@
         this.y.domain([0, d3.max(values, price => price.price)])
           .nice();
 
-        var svg = this.svg.transition();
+        const graph = d3.select(this.$.graph).transition();
 
-        // x axis
-        svg.select('.x-axis')
-          .duration(this.transitionDuration)
+        // // x axis
+        graph.select('.x-axis')
           .call(this.xaxis);
 
         // y axis
-        svg.select('.y-axis')
-          .duration(this.transitionDuration)
+        graph.select('.y-axis')
           .call(this.yaxis);
 
-        // // area
-        // svg.select('.area')
-        //   .duration(this.transitionDuration)
-        //   .attr('d', this.area(values));
-
         // line
-        svg.select('.line')
-          .duration(this.transitionDuration)
+        graph.select('.line')
           .attr('d', this.line(values));
+      }
+      resize() {
+        const margin = {top: 20, right: 20, bottom: 30, left: 50};
+        const rect = this.getBoundingClientRect();
+        const width = rect.width - margin.left - margin.right;
+        const height = rect.height - margin.top - margin.bottom;
+
+        const graph = d3.select(this.$.graph)
+          .attr('width', rect.width)
+          .attr('height', rect.height);
+
+        graph.select('.container')
+          .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+        graph.select('.x-axis')
+          .attr('transform', `translate(0, ${height})`);
+
+        this.x = d3.scaleTime().range([0, width]);
+        this.y = d3.scaleLinear().range([height, 0]);
+
+        this.xaxis = d3.axisBottom(this.x).ticks(d3.timeDay);
+        this.yaxis = d3.axisLeft(this.y);
+
+        this.plot();
       }
     };
     customElements.define(AppGraph.is, AppGraph);
