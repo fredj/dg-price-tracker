@@ -61,10 +61,7 @@
           .x((d) => this.x(d.date))
           .y((d) => this.y(d.price));
       }
-      // values or period changed
       plot() {
-
-        /////////////////////////////////
         const period = this.period === undefined ? this.values.length : this.period;
         const values = this.values.slice(-this.period);
         this.x.domain([

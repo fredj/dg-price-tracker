@@ -69,7 +69,7 @@
       </div>
       <iron-collapse id="collapse_panel">
         <div class="graph">
-          <app-graph id="graph" values="[[prices]]" width="600" height="260" period="[[graphPeriod]]"></app-graph>
+          <app-graph id="graph" values="[[prices]]" period="[[graphPeriod]]"></app-graph>
           <div class="period-selector">
             <paper-button toggles data-value="7" on-tap="update_graph_period">last week</paper-button>
             <paper-button toggles data-value="30" on-tap="update_graph_period">last month</paper-button>
