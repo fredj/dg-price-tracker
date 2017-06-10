@@ -45,7 +45,7 @@ function onFormSubmit(event) {
 function productId(url) {
   // FIXME: validate host
   // FIXME: validate is a product
-  var match = url.match(/.*-(\d*)/);
+  var match = url.match(/[^=]*-(\d*)/);
   if (match) {
     var id;
     if (url.indexOf('https://www.galaxus.ch') == 0) {
