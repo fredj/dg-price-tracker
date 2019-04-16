@@ -69,6 +69,6 @@ if __name__ == '__main__':
         update_price(product_id, price)
         # update products.csv with title, last price and image
         # 'title' may contains commas
-        content[i] = '%s,"%s",%s,%s' % (product_id, title, price, image)
+        content[i] = '%s,"%s",%s,%s' % (product_id, title.replace('"', '""'), price, image)
 
     push_commit(entry.get('path'), '\n'.join(content), '[skip ci] Update products.csv', entry.get('sha'))
