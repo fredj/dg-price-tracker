@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.7-slim
 
 ADD requirements.txt /app/
 RUN pip install --no-cache-dir -r /app/requirements.txt
