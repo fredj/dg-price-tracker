@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 HTTP_HEADERS = {
     'cache-control': 'no-cache',
-    'user-agent': 'foobar/2000',
+    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
 }
 
 BASE_URLS = {
