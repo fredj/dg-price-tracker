@@ -18,10 +18,10 @@ def get_info(product_id):
     r = requests.get(url, headers=HTTP_HEADERS)
     if r.ok:
         doc = BeautifulSoup(r.content, 'html.parser')
-        title = doc.html.find('meta', property='og:title').attrs.get('content')
-        image = doc.html.find('meta', property='og:image').attrs.get('content')
+        title = doc.html.find('meta', attrs={'property': 'og:title'}).attrs.get('content')
+        image = doc.html.find('meta', attrs={'property': 'og:image'}).attrs.get('content')
         # if the product is currently unavailable, the price is not set
-        price_node = doc.html.find('meta', itemprop='price')
+        price_node = doc.html.find('meta', attrs={'name': 'product:price:amount'})
         price = price_node.attrs.get('content') if price_node is not None else 0
 
         return title, image, float(price)
