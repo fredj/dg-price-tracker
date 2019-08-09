@@ -2,9 +2,9 @@
 
 name: Daily price update
 
-on:
-  schedule:
-  - cron: 0 4 * * *
+on: [pull_request]
+  # schedule:
+  # - cron: 0 4 * * *
 
 jobs:
   update_all_prices:
