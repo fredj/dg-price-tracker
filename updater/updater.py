@@ -13,22 +13,23 @@ from product import get_info
 CONTENTS_API_URL = 'https://api.github.com/repos/fredj/dg-price-tracker/contents/%s?ref=gh-pages'
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
-assert GITHUB_TOKEN is not None, 'GITHUB_TOKEN environment variables is undefined'
 
 session = requests.Session()
-session.headers.update({
-    'Authorization': 'token %s' % GITHUB_TOKEN
-})
+if GITHUB_TOKEN is not None:
+    session.headers.update({
+        'Authorization': 'token %s' % GITHUB_TOKEN
+    })
 
 def push_commit(path, content, message, sha):
-    commit = {
-        'message': message,
-        'content': base64.b64encode(bytes(content, 'utf-8')).decode('ascii'),
-        'sha': sha,
-        'branch': 'gh-pages',
-    }
-    r = session.put(CONTENTS_API_URL % path, data=json.dumps(commit))
-    assert r.ok, r.text
+   if GITHUB_TOKEN is not None:
+        commit = {
+            'message': message,
+            'content': base64.b64encode(bytes(content, 'utf-8')).decode('ascii'),
+            'sha': sha,
+            'branch': 'gh-pages',
+        }
+        r = session.put(CONTENTS_API_URL % path, data=json.dumps(commit))
+        assert r.ok, r.text
 
 def update_price(product_id, price):
     today = datetime.datetime.now().strftime('%Y-%m-%d')
