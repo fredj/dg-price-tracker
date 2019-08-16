@@ -1,0 +1,20 @@
+name: Update prices
+
+on:
+  pull_request:
+    branches:
+    - master
+    
+  schedule:
+    - cron: 0 4 * * *
+
+jobs:
+
+  build:
+ 
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: docker build -t dg_updater updater/
