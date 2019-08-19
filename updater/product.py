@@ -16,7 +16,7 @@ def get_info(product_id):
         title = r.html.find("meta[property='og:title']", first=True).attrs.get('content')
         image = r.html.find("meta[property='og:image']", first=True).attrs.get('content')
         # if the product is currently unavailable, the price is not set
-        price_node = r.html.find("meta[name='product:price:amount']", first=True)
+        price_node = r.html.find("meta[property='product:price:amount']", first=True)
         price = price_node.attrs.get('content') if price_node is not None else 0
 
         return title, image, float(price)
