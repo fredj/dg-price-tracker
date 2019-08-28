@@ -1,20 +1,22 @@
+# https://help.github.com/en/articles/workflow-syntax-for-github-actions
 name: Update prices
 
 on:
   pull_request:
     branches:
-    - master
-    
+      - master
   schedule:
     - cron: 0 4 * * *
 
 jobs:
 
-  build:
- 
+  all:
     runs-on: ubuntu-latest
- 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@master
     - name: Build the Docker image
       run: docker build -t dg_updater updater/
+    - name: Update prices
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: docker run -e GITHUB_TOKEN=$GITHUB_TOKEN dg_updater
